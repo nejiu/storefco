@@ -70,7 +70,7 @@ footer{color:var(--grey);text-align:center;font-size:.85rem;padding:40px 18px 30
   <div class="hero"><h1>🛒 CỬA HÀNG SẢN PHẨM</h1><p>Chọn sản phẩm bạn muốn mua bên dưới.</p><input class="q" id="q" placeholder="🔍 Tìm sản phẩm..."></div>
   <nav class="tabs" id="tabs"></nav><div id="top"></div><div id="cats"><div class="empty">Đang tải...</div></div>
 </main>
-<footer>© Store Game</footer>
+<footer>© Store Game · v5</footer>
 <div id="toast"></div><div id="sale"></div>
 
 <div class="modal" id="mB"><div class="box" id="bBody"></div></div>
@@ -291,7 +291,7 @@ $('sSave').onclick=async()=>{
 };
 $('lGo').onclick=()=>busy($('lGo'),async()=>{
   const {data,error}=await withTimeout(sb.auth.signInWithPassword({email:ADMIN_EMAIL||$('lEmail').value.trim(),password:$('lPw').value}));
-  if(error)return alert('Sai mật khẩu quản lý.');
+  if(error)return alert((/invalid/i.test(error.message)?'Sai mật khẩu hoặc chưa có tài khoản quản lý. ':'')+'['+error.message+(error.status?' · '+error.status:'')+']');
   if(!isAdm(data.session)){sb.auth.signOut().catch(()=>{});return alert('Đăng nhập được nhưng tài khoản chưa có quyền quản lý. Chạy dòng SQL cấp quyền admin trong Supabase rồi thử lại.')}
   $('lPw').value='';closeAll();user=null;enter().catch(e=>alert('Lỗi: '+(e&&e.message||e)));
 });
@@ -356,7 +356,7 @@ $('aGo').onclick=()=>busy($('aGo'),async()=>{
   if(!/^[a-z0-9_]{3,20}$/.test(u))return alert('Tên đăng nhập 3-20 ký tự: chữ thường không dấu, số hoặc _');
   if(pw.length<6)return alert('Mật khẩu tối thiểu 6 ký tự');
   const r=await withTimeout(amode==='login'?sb.auth.signInWithPassword({email:mail(u),password:pw}):sb.auth.signUp({email:mail(u),password:pw}));
-  if(r.error)return alert(amode==='login'?'Sai tên đăng nhập hoặc mật khẩu.':(/regist|exist/i.test(r.error.message)?'Tên đăng nhập đã có người dùng.':'Lỗi: '+r.error.message));
+  if(r.error)return alert(amode==='login'?(/invalid/i.test(r.error.message)?'Sai tên đăng nhập hoặc mật khẩu.':'Lỗi đăng nhập: '+r.error.message):(/regist|exist/i.test(r.error.message)?'Tên đăng nhập đã có người dùng.':'Lỗi: '+r.error.message));
   if(!r.data.session)return alert('Đăng ký chưa xong: cần tắt "Confirm email" trong Supabase (Authentication > Sign In / Providers > Email).');
   $('aPw').value='';setUser(r.data.session);closeAll();toast('Xin chào '+u);
 });
